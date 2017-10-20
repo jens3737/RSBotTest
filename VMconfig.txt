@@ -1,0 +1,3 @@
+-Djava.search.path=out
+-Dcom.jagex.config=http://oldschool.runescape.com/l=en/jav_config.ws
+-javaagent:"C:\Users\JHNBD42\Documents\rs\jars\RSBot-7049.jar"
