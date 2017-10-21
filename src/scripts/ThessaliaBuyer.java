@@ -8,11 +8,15 @@ import org.powerbot.script.rt4.*;
 
 @Script.Manifest(name = "Hello, RSBot!", properties = "author=Jens; topic=1296203; client=4;", description = "A 'Hello, World' example for RSBot" )
 public class ThessaliaBuyer extends PollingScript<ClientContext> {
-
-    Boolean STOPPED = false;
     final static int THESSALIA_ID = 534;
-    final static Tile TILE_BANK = new Tile(3183, 3435, 0);
-    final static Tile TILE_SHOP = new Tile(3209, 3415, 0);
+    final static Tile[] AREA_FRONTSHOP = new Tile[]{
+            new Tile(3209, 3415, 0),
+            new Tile(3209, 3416, 0),
+            new Tile(3209, 3414, 0),
+            new Tile(3210, 3415, 0),
+            new Tile(3210, 3414, 0),
+            new Tile(3210, 3416, 0),
+    };
     final static Tile[] AREA_SHOP = new Tile[]{
             new Tile(3208, 3418, 0),
             new Tile(3208, 3416, 0),
@@ -46,7 +50,6 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
             new Tile(3202, 3416, 0),
             new Tile(3202, 3414, 0),
     };
-
     final static Tile[] AREA_BANK = new Tile[]{ new Tile(3185, 3433, 0),
             new Tile(3185, 3434, 0),
             new Tile(3185, 3435, 0),
@@ -130,16 +133,21 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
     };
     final static int GYPSY_ID = 5082;
     final static int BANKER_ID = 2897;
+
+    //1013 skirt, 1757 apron, 1007 cape
+    final static int[] BUY_IDS = {1013, 1757, 1007};
+
+    final Component[] BuyComponents = {ctx.widgets.widget(300).component(2).component(6),
+            ctx.widgets.widget(300).component(2).component(9),
+            ctx.widgets.widget(300).component(2).component(5)
+    };
+
     final Component PinkSkirt = ctx.widgets.widget(300).component(2).component(6);
     final Component RedCape = ctx.widgets.widget(300).component(2).component(9);
     final Component BrownApron = ctx.widgets.widget(300).component(2).component(5);
+
     final static int[] Worlds = {0, 6, 12, 18, 24, 36, 42, 48, 60, 66};
     static int indexWorlds = 0;
-    final static int CLOSEDDOOR_ID = 11775;
-    final static int OPENDOOR_ID = 11774;
-    final static int PINKSKIRT_ID = 1013;
-    final static int BROWNAPRON_ID = 1757;
-    final static int REDCAPE_ID = 1007;
 
     @Override
     public void start() {
@@ -159,6 +167,7 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
                 if(moveToShop()){
                     if(!isDoorOpen()){
                         log.info("deur is toe");
+
                         delay(100);
                         openDoor(1);
                         delay(400);
@@ -170,24 +179,9 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
                         delay(200);
                     }
                 }
-//
-//                while (!moveToShop()){
-//                    moveToShop();
-//                }
-
             }
             else{
                 buyItems();
-//                if(!isDoorOpen()){
-//                    log.info("deur is toe");
-//                    openDoor(1);
-//                    buyItems();
-//                }
-//                else {
-//                    log.info("deur is open");
-//                    buyItems();
-//                    delay(200);
-//                }
             }
         }
 
@@ -263,7 +257,7 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
     }
 
     public Boolean isPlayerInFrontofShop(){
-        if(TILE_SHOP.toString().equals(ctx.players.local().tile().toString())){
+        if(isPlayerInArea(AREA_FRONTSHOP)){
             return true;
         }
 
@@ -274,7 +268,7 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
     }
 
     public Boolean isPlayerInBank(){
-        if(TILE_BANK.toString().equals(ctx.players.local().tile().toString())){
+        if(isPlayerInArea(AREA_BANK)){
             return true;
         }
 
@@ -308,6 +302,8 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
             case 1:
                 while (!isDoorOpen()) {
                     GameObject shopClosedDoor = ctx.objects.select().id(11775).nearest().poll();
+                    ctx.camera.turnTo(shopClosedDoor);
+                    delay(500);
                     shopClosedDoor.interact("Open");
                     delay(1200);
                 }
@@ -315,6 +311,8 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
             case 0:
                 while (!isDoorOpenExit()) {
                     GameObject shopClosedDoor = ctx.objects.select().id(11775).nearest().poll();
+                    ctx.camera.turnTo(shopClosedDoor);
+                    delay(500);
                     shopClosedDoor.interact("Open");
                     delay(1200);
                 }
@@ -330,26 +328,31 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
         delay(2000);
     }
 
-    public void doBuy(){
-            while (PinkSkirt.itemStackSize() > 0 && !isInventoryFull()) {
-                delay(1500);
-                PinkSkirt.interact("Buy 5", "Pink skirt");
-            }
-            while (RedCape.itemStackSize() > 0 && !isInventoryFull()) {
+    public void doBuy(Component[] buyComponents){
+        for(int i = 0; i < buyComponents.length; i++){
+            while (buyComponents[i].itemStackSize() > 0 && !isInventoryFull()) {
                 delay(500);
-                RedCape.interact("Buy 5", "Red cape");
+                buyComponents[i].interact("Buy 5");
             }
-            while(BrownApron.itemStackSize()>0 && !isInventoryFull()){
-                delay(500);
-                BrownApron.interact("Buy 5", "Brown apron");
-            }
-            //if no stock --> close widget
+        }
         if(!isInventoryFull()){
             closeShop(800);
             switchWorld();
         }
         else closeShop(800);
 
+//            while (PinkSkirt.itemStackSize() > 0 && !isInventoryFull()) {
+//                delay(1500);
+//                PinkSkirt.interact("Buy 5", "Pink skirt");
+//            }
+//            while (RedCape.itemStackSize() > 0 && !isInventoryFull()) {
+//                delay(500);
+//                RedCape.interact("Buy 5", "Red cape");
+//            }
+//            while(BrownApron.itemStackSize()>0 && !isInventoryFull()){
+//                delay(500);
+//                BrownApron.interact("Buy 5", "Brown apron");
+//            }
     }
 
     public void buyItems() {
@@ -362,13 +365,13 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
                     interactNpc(Thessalia, "Trade");
                 }
                 //Buy if stock > 0
-                doBuy();
+                doBuy(BuyComponents);
                 delay(5000);
             }
 
             //Widget is open, close it
             else if(isShopOpen()) {
-                doBuy();
+                doBuy(BuyComponents);
                 delay(5000);
             }
     }
@@ -410,14 +413,21 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
         }
     }
 
-    public void doDeposit(){
-        ctx.bank.deposit(PINKSKIRT_ID, 27);
-        delay(200);
-        ctx.bank.deposit(REDCAPE_ID, 27);
-        delay(200);
-        ctx.bank.deposit(BROWNAPRON_ID, 27);
-        delay(200);
+    public void doDeposit(int[] itemIDs){
+        for(int i = 0; i < itemIDs.length; i++){
+            ctx.bank.deposit(itemIDs[i], 27);
+            delay(200);
+        }
         ctx.bank.close();
+//
+//
+//        ctx.bank.deposit(PINKSKIRT_ID, 27);
+//        delay(200);
+//        ctx.bank.deposit(REDCAPE_ID, 27);
+//        delay(200);
+//        ctx.bank.deposit(BROWNAPRON_ID, 27);
+//        delay(200);
+//        ctx.bank.close();
     }
 
     public Boolean depositToBank(){
@@ -430,7 +440,7 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
 
         //Wanneer bank tab open is, deposit inventory
         while(ctx.bank.open()){
-            doDeposit();
+            doDeposit(BUY_IDS);
             delay(800);
             return true;
         }
