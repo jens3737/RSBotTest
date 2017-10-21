@@ -6,7 +6,7 @@ import org.powerbot.script.Area;
 import org.powerbot.script.Tile;
 import org.powerbot.script.rt4.*;
 
-@Script.Manifest(name = "Hello, RSBot!", properties = "author=Jens; topic=1296203; client=4;", description = "A 'Hello, World' example for RSBot" )
+@Script.Manifest(name = "Thessalia buyer", properties = "author=Jens; topic=1296203; client=4;", description = "Buy & bank Thessalia's items" )
 public class ThessaliaBuyer extends PollingScript<ClientContext> {
     final static int THESSALIA_ID = 534;
     final static Tile[] AREA_FRONTSHOP = new Tile[]{
@@ -135,11 +135,11 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
     final static int BANKER_ID = 2897;
 
     //1013 skirt, 1757 apron, 1007 cape
-    final static int[] BUY_IDS = {1013, 1757, 1007};
+    final static int[] BUY_IDS = {1013};
 
-    final Component[] BuyComponents = {ctx.widgets.widget(300).component(2).component(6),
-            ctx.widgets.widget(300).component(2).component(9),
-            ctx.widgets.widget(300).component(2).component(5)
+    final Component[] BuyComponents = {ctx.widgets.widget(300).component(2).component(6)
+//            ctx.widgets.widget(300).component(2).component(9),
+//            ctx.widgets.widget(300).component(2).component(5)
     };
 
     final Component PinkSkirt = ctx.widgets.widget(300).component(2).component(6);
@@ -158,6 +158,7 @@ public class ThessaliaBuyer extends PollingScript<ClientContext> {
     @Override
     public void stop() {
         log.info("script stopped, RSBot!");
+        start();
     }
 
     @Override
