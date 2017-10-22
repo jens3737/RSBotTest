@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/RSBotTest.iml" filepath="$PROJECT_DIR$/RSBotTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/osrsThessaliaBuyer.iml" filepath="$PROJECT_DIR$/osrsThessaliaBuyer.iml" />
     </modules>
   </component>
 </project>
